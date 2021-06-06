@@ -155,7 +155,7 @@ stediStreamingDF.withColumn("value", from_json("value", stediEventSchema))\
     .createOrReplaceTempView("CustomerRisk")
 
 # TO-DO: execute a sql statement against a temporary view, selecting the customer and the score from the temporary view, creating a dataframe called customerRiskStreamingDF
-customerRiskStreamingDF = spark.sql("select * from CustomerRisk")
+customerRiskStreamingDF = spark.sql("select customer, score from CustomerRisk")
 
 # TO-DO: join the streaming dataframes on the email address to get the risk score and the birth year in the same dataframe
 customerRiskJoinStreamingDF = customerRiskStreamingDF\
@@ -163,8 +163,6 @@ customerRiskJoinStreamingDF = customerRiskStreamingDF\
    customer=email
 """
 ))
-
-customerRiskJoinSelectedStreamingDF = customerRiskJoinStreamingDF.select("customer", "score", "email", "birthYear")
 
 # TO-DO: sink the joined dataframes to a new kafka topic to send the data to the STEDI graph application 
 # +--------------------+-----+--------------------+---------+
@@ -186,7 +184,7 @@ customerRiskJoinSelectedStreamingDF = customerRiskJoinStreamingDF.select("custom
 #     .start()\
 #     .awaitTermination()
 
-customerRiskJoinSelectedStreamingDF.selectExpr("cast(customer as string) as key", "to_json(struct(*)) as value")\
+customerRiskJoinStreamingDF.selectExpr("cast(customer as string) as key", "to_json(struct(*)) as value")\
     .writeStream\
     .format("kafka")\
     .option("kafka.bootstrap.servers", "kafka:19092")\
