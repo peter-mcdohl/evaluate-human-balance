@@ -10,7 +10,7 @@ stediEventSchema = StructType([
     StructField("riskDate", DateType())
 ])
 
-spark = SparkSession.builder.appName("redis-data").getOrCreate()
+spark = SparkSession.builder.appName("stedi-events").getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
 
 stediRawStreamingDF = spark.readStream\
